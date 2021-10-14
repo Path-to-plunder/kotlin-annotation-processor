@@ -24,6 +24,13 @@ internal fun Element.isTopLevelFunction() =
         ?.kind == KotlinClassHeader.FILE_FACADE_KIND
 
 @OptIn(KotlinPoetMetadataPreview::class)
+internal fun Element.isClass() =
+    getAnnotation(Metadata::class.java)
+        ?.readKotlinClassMetadata()
+        ?.header
+        ?.kind == KotlinClassHeader.CLASS_KIND
+
+@OptIn(KotlinPoetMetadataPreview::class)
 internal fun Element.getClassName(): ClassName {
     val typeMetadata = getAnnotation(Metadata::class.java)
     val kmClass = typeMetadata.toImmutableKmClass()
