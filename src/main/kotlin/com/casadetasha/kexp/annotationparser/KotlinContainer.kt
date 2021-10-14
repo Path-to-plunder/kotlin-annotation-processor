@@ -49,6 +49,12 @@ sealed class KotlinContainer(
             .primaryConstructor()
             ?.valueParameters
 
+        fun getAnnotation(annotationClass: KClass<out Annotation>): Annotation? {
+            return element.getAnnotation(annotationClass.java)
+        }
+
+        val properties = classData.properties
+
         override val kotlinFunctions: Set<KotlinFunction> by lazy {
             classData.methods
                 .filter { functionMap.containsKey(it.key.name) }
