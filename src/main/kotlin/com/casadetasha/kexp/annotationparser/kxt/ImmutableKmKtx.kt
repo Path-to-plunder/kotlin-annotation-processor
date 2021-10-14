@@ -8,12 +8,6 @@ import kotlinx.metadata.ClassName
 import kotlinx.metadata.KmClassifier
 
 @OptIn(KotlinPoetMetadataPreview::class)
-internal fun ImmutableKmValueParameter.asCanonicalName(): String {
-    val clazz = type!!.classifier as KmClassifier.Class
-    return clazz.name.replace("/", ".")
-}
-
-@OptIn(KotlinPoetMetadataPreview::class)
 internal fun ImmutableKmType.toMemberName(): MemberName {
     val name: ClassName = (classifier as KmClassifier.Class).name
     return MemberName(name.packageName, name.simpleName)

@@ -1,12 +1,8 @@
 package com.casadetasha.kexp.annotationparser
 
-import com.casadetasha.kexp.sproute.processor.MemberNames.convertToMemberNames
-import com.casadetasha.kexp.sproute.processor.ktx.primaryConstructor
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.metadata.ImmutableKmPackage
-import com.squareup.kotlinpoet.metadata.ImmutableKmValueParameter
-import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
+import com.squareup.kotlinpoet.metadata.*
 import com.squareup.kotlinpoet.metadata.specs.ClassData
 import kotlinx.metadata.KmClassifier
 import javax.lang.model.element.Element
@@ -47,10 +43,10 @@ sealed class KotlinContainer(
         classSimpleName = classData.className.simpleName
     ) {
 
-        val primaryConstructorParams: List<MemberName>? by lazy {
+        val primaryConstructorParams: List<String>? by lazy {
             classData.primaryConstructor()
                 ?.valueParameters
-                ?.convertToMemberNames()
+                ?.map { it.asCanonicalName() }
         }
 
         override val kotlinFunctions: Set<KotlinFunction> by lazy {
@@ -96,13 +92,13 @@ sealed class KotlinContainer(
 }
 
 @OptIn(KotlinPoetMetadataPreview::class)
-fun List<ImmutableKmValueParameter>.convertToMemberNames(): List<MemberName> {
-    return map { it.asCanonicalName() }
-        .map { memberMap[it]!! }
-}
-
-@OptIn(KotlinPoetMetadataPreview::class)
 internal fun ImmutableKmValueParameter.asCanonicalName(): String {
     val clazz = type!!.classifier as KmClassifier.Class
     return clazz.name.replace("/", ".")
+}
+
+
+@OptIn(KotlinPoetMetadataPreview::class)
+internal fun ClassData.primaryConstructor(): ImmutableKmConstructor? {
+    return constructors.keys.firstOrNull { it.isPrimary }
 }

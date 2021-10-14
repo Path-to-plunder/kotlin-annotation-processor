@@ -6,6 +6,7 @@ import com.casadetasha.kexp.annotationparser.kxt.toMemberName
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.metadata.ImmutableKmFunction
 import com.squareup.kotlinpoet.metadata.ImmutableKmType
+import com.squareup.kotlinpoet.metadata.ImmutableKmValueParameter
 import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import kotlinx.metadata.KmClassifier
 import javax.lang.model.element.Element
@@ -20,7 +21,7 @@ sealed class KotlinFunction(
 
     abstract val memberName: MemberName
     val simpleName: String = function.name
-    val parameters: List<MemberName> = function.valueParameters.convertToMemberNames()
+    val parameters: List<ImmutableKmValueParameter> = function.valueParameters
     val receiver: MemberName? by lazy {
         val receiverType = function.receiverParameterType
         if (receiverType == null) null
