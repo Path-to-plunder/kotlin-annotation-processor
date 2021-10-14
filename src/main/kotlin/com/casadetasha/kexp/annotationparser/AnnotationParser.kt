@@ -3,17 +3,17 @@ package com.casadetasha.kexp.annotationparser
 import javax.annotation.processing.ProcessingEnvironment
 
 object AnnotationParser {
-    private var _processingEnv: ProcessingEnvironment? = null
-    internal var processingEnvironment: ProcessingEnvironment
+    private var processingEnv_: ProcessingEnvironment? = null
+    internal var processingEnv: ProcessingEnvironment
         get() {
-            if (_processingEnv == null) throw IllegalStateException("AnnotationParser.setup(ProcessingEnvironment) must be called before using annotation parser extensions.")
-            return _processingEnv!!
+            if (processingEnv_ == null) throw IllegalStateException("AnnotationParser.setup(ProcessingEnvironment) must be called before using annotation parser extensions.")
+            return processingEnv_!!
         }
         set(processingEnv) {
-            _processingEnv = processingEnv
+            processingEnv_ = processingEnv
         }
 
     fun setup(processingEnv: ProcessingEnvironment) {
-        this.processingEnvironment = processingEnv
+        this.processingEnv = processingEnv
     }
 }

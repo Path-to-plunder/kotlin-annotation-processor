@@ -1,6 +1,5 @@
 package com.casadetasha.kexp.annotationparser
 
-import com.casadetasha.kexp.annotationparser.ktx.toMemberName
 import com.casadetasha.kexp.annotationparser.kxt.hasAnnotation
 import com.casadetasha.kexp.annotationparser.kxt.toMemberName
 import com.squareup.kotlinpoet.MemberName

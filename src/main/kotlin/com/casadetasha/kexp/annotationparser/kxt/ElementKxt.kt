@@ -1,6 +1,6 @@
 package com.casadetasha.kexp.annotationparser.kxt
 
-import com.casadetasha.kexp.annotationparser.AnnotationParser.processingEnvironment
+import com.casadetasha.kexp.annotationparser.AnnotationParser.processingEnv
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.metadata.*
 import com.squareup.kotlinpoet.metadata.specs.internal.ClassInspectorUtil
@@ -31,7 +31,7 @@ internal fun Element.getClassName(): ClassName {
 }
 
 internal fun Element.asKey(): String {
-    val packageName = processingEnvironment.elementUtils.getPackageOf(this).qualifiedName.toString()
+    val packageName = processingEnv.elementUtils.getPackageOf(this).qualifiedName.toString()
     val containerName = enclosingElement.simpleName.toString()
     return "${packageName}.${containerName}.${simpleName}"
 }
@@ -51,6 +51,6 @@ internal fun Element.hasAnnotation(clazz: Class<out Annotation>): Boolean {
 
 internal val Element.packageName: String
     get() {
-        val packageElement = processingEnvironment.elementUtils.getPackageOf(this)
-        return processingEnvironment.elementUtils.getPackageOf(packageElement).qualifiedName.toString()
+        val packageElement = processingEnv.elementUtils.getPackageOf(this)
+        return processingEnv.elementUtils.getPackageOf(packageElement).qualifiedName.toString()
     }

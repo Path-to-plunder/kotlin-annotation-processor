@@ -1,5 +1,7 @@
 package com.casadetasha.kexp.annotationparser
 
+import com.casadetasha.kexp.annotationparser.kxt.asCanonicalName
+import com.casadetasha.kexp.annotationparser.kxt.primaryConstructor
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.metadata.*
@@ -43,11 +45,9 @@ sealed class KotlinContainer(
         classSimpleName = classData.className.simpleName
     ) {
 
-        val primaryConstructorParams: List<String>? by lazy {
-            classData.primaryConstructor()
-                ?.valueParameters
-                ?.map { it.asCanonicalName() }
-        }
+        val primaryConstructorParams: List<ImmutableKmValueParameter>? = classData
+            .primaryConstructor()
+            ?.valueParameters
 
         override val kotlinFunctions: Set<KotlinFunction> by lazy {
             classData.methods
@@ -89,16 +89,4 @@ sealed class KotlinContainer(
                 }.toSortedSet()
         }
     }
-}
-
-@OptIn(KotlinPoetMetadataPreview::class)
-internal fun ImmutableKmValueParameter.asCanonicalName(): String {
-    val clazz = type!!.classifier as KmClassifier.Class
-    return clazz.name.replace("/", ".")
-}
-
-
-@OptIn(KotlinPoetMetadataPreview::class)
-internal fun ClassData.primaryConstructor(): ImmutableKmConstructor? {
-    return constructors.keys.firstOrNull { it.isPrimary }
 }
