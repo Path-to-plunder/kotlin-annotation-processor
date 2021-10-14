@@ -35,15 +35,19 @@ sealed class KotlinFunction(
     val returnType: ImmutableKmType = function.returnType
     val hasReturnValue: Boolean = returnType.toMemberName() != Unit::class.toMemberName()
 
-    override fun compareTo(other: KotlinFunction): Int {
-        return this.memberName.toString().compareTo(other.memberName.toString())
-    }
-
     fun hasAnyAnnotationsIn(vararg annotations: KClass<out Annotation>): Boolean {
         annotations.forEach {
             if (element.hasAnnotation(it.java)) return true
         }
         return false
+    }
+
+    fun getAnnotation(annotationClass: KClass<out Annotation>): Annotation {
+        return element.getAnnotation(annotationClass.java)
+    }
+
+    override fun compareTo(other: KotlinFunction): Int {
+        return this.memberName.toString().compareTo(other.memberName.toString())
     }
 
     class KotlinTopLevelFunction(
