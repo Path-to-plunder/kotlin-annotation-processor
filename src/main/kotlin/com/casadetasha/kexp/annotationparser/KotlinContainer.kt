@@ -40,7 +40,8 @@ sealed class KotlinContainer(
         element: Element,
         val className: ClassName,
         val classData: ClassData,
-        val functionMap: Map<String, Element>
+        val functionElementMap: Map<String, Element>,
+        propertyElementMap: Map<String, Element>
     ) : KotlinContainer(
         element = element,
         packageName = classData.className.packageName,
@@ -60,7 +61,7 @@ sealed class KotlinContainer(
                 .map {
                     KotlinProperty(
                         packageName = packageName,
-                        propertyElement = element,
+                        propertyElement = propertyElementMap[it.key.name]!!,
                         property = it.key,
                         propertyData = it.value
                     )
@@ -69,11 +70,11 @@ sealed class KotlinContainer(
 
         override val kotlinFunctions: Set<KotlinFunction> by lazy {
             classData.methods
-                .filter { functionMap.containsKey(it.key.name) }
+                .filter { functionElementMap.containsKey(it.key.name) }
                 .map { entry ->
                     KotlinFunction.KotlinMemberFunction(
                         packageName = packageName,
-                        methodElement = functionMap[entry.key.name]!!,
+                        methodElement = functionElementMap[entry.key.name]!!,
                         function = entry.key
                     )
                 }

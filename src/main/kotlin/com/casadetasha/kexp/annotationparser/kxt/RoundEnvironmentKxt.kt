@@ -1,6 +1,5 @@
 package com.casadetasha.kexp.annotationparser.kxt
 
-import com.casadetasha.kexp.annotationparser.AnnotationParser.processingEnv
 import com.casadetasha.kexp.annotationparser.KotlinContainer
 import com.squareup.kotlinpoet.metadata.*
 import javax.annotation.processing.RoundEnvironment
@@ -45,21 +44,7 @@ fun RoundEnvironment.getClassesAnnotatedWith(
             element = it,
             className = className,
             classData = className.getClassData(),
-            functionMap = it.getRequestMethods()
-        )
-    }.toSet()
-
-@OptIn(KotlinPoetMetadataPreview::class)
-fun RoundEnvironment.getContainersAnnotatedWith(
-    annotationClass: KClass<out Annotation>
-): Set<KotlinContainer.KotlinClass> = getElementsAnnotatedWith(annotationClass.java)
-    .filter { it.isClass() }
-    .map {
-        val className = it.getClassName()
-        KotlinContainer.KotlinClass(
-            element = it,
-            className = className,
-            classData = className.getClassData(),
-            functionMap = it.getRequestMethods()
+            functionElementMap = it.getChildFunctionElementMap(),
+            propertyElementMap = it.getChildPropertyElementMap()
         )
     }.toSet()

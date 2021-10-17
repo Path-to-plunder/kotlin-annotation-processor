@@ -10,6 +10,8 @@ import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 
+private const val KOTLIN_SUFFIX_SYMBOL = "$"
+
 @OptIn(KotlinPoetMetadataPreview::class)
 internal fun Element.getParentFileKmPackage(): ImmutableKmPackage =
     enclosingElement.getAnnotation(Metadata::class.java)!!
@@ -43,11 +45,20 @@ internal fun Element.asKey(): String {
     return "${packageName}.${containerName}.${simpleName}"
 }
 
-internal fun Element.getRequestMethods(): Map<String, Element> = HashMap<String, Element>()
+internal fun Element.getChildFunctionElementMap(): Map<String, Element> = HashMap<String, Element>()
     .apply {
         enclosedElements.forEach {
             if (it.kind == ElementKind.METHOD) {
                 this += it.simpleName.toString() to it as ExecutableElement
+            }
+        }
+    }
+
+internal fun Element.getChildPropertyElementMap(): Map<String, Element> = HashMap<String, Element>()
+    .apply {
+        enclosedElements.forEach {
+            if (it.kind == ElementKind.FIELD) {
+                this += it.simpleNameWithoutSuffix to it
             }
         }
     }
@@ -61,3 +72,12 @@ internal val Element.packageName: String
         val packageElement = processingEnv.elementUtils.getPackageOf(this)
         return processingEnv.elementUtils.getPackageOf(packageElement).qualifiedName.toString()
     }
+
+private val Element.simpleNameWithoutSuffix: String
+    get() {
+        if (simpleName.contains(KOTLIN_SUFFIX_SYMBOL)) {
+            return simpleName.substring(0, simpleName.indexOf(KOTLIN_SUFFIX_SYMBOL))
+        }
+        return simpleName.toString()
+    }
+
