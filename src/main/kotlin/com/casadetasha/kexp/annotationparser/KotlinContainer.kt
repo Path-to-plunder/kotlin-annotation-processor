@@ -1,12 +1,14 @@
 package com.casadetasha.kexp.annotationparser
 
-import com.casadetasha.kexp.annotationparser.kxt.asCanonicalName
+import com.casadetasha.kexp.annotationparser.KotlinValue.KotlinFunction
+import com.casadetasha.kexp.annotationparser.KotlinValue.KotlinProperty
 import com.casadetasha.kexp.annotationparser.kxt.primaryConstructor
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.metadata.*
+import com.squareup.kotlinpoet.metadata.ImmutableKmPackage
+import com.squareup.kotlinpoet.metadata.ImmutableKmValueParameter
+import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import com.squareup.kotlinpoet.metadata.specs.ClassData
-import kotlinx.metadata.KmClassifier
 import javax.lang.model.element.Element
 import kotlin.reflect.KClass
 
@@ -53,7 +55,17 @@ sealed class KotlinContainer(
             return element.getAnnotation(annotationClass.java)
         }
 
-        val properties = classData.properties
+        val kotlinProperties by lazy {
+            classData.properties
+                .map {
+                    KotlinProperty(
+                        packageName = packageName,
+                        propertyElement = element,
+                        property = it.key,
+                        propertyData = it.value
+                    )
+                }
+        }
 
         override val kotlinFunctions: Set<KotlinFunction> by lazy {
             classData.methods
