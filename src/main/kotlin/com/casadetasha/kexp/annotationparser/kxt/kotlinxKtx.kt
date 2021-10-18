@@ -11,3 +11,5 @@ internal val ClassName.packageName: String
 
 internal val ClassName.simpleName: String
     get() = this.split('/').last()
+
+internal fun String.removeWrappingQuotes(): String = removePrefix("\"").removeSuffix("\"")

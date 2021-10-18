@@ -44,7 +44,6 @@ fun RoundEnvironment.getClassesAnnotatedWith(
             element = it,
             className = className,
             classData = className.getClassData(),
-            functionElementMap = it.getChildFunctionElementMap(),
-            propertyElementMap = it.getChildPropertyElementMap()
+            functionElementMap = it.getChildFunctionElementMap()
         )
     }.toSet()

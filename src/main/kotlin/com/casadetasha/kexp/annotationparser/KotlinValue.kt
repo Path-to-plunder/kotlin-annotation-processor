@@ -1,8 +1,11 @@
 package com.casadetasha.kexp.annotationparser
 
 import com.casadetasha.kexp.annotationparser.kxt.hasAnnotation
+import com.casadetasha.kexp.annotationparser.kxt.removeWrappingQuotes
 import com.casadetasha.kexp.annotationparser.kxt.toMemberName
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.MemberName
+import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.metadata.*
 import com.squareup.kotlinpoet.metadata.specs.PropertyData
 import kotlinx.metadata.KmClassifier
@@ -11,33 +14,29 @@ import kotlin.reflect.KClass
 
 @OptIn(KotlinPoetMetadataPreview::class)
 sealed class KotlinValue(
-    val element: Element,
     val packageName: String,
     val simpleName: String
-) {
+) : Comparable<KotlinValue> {
 
     val memberName: MemberName = MemberName(packageName, simpleName)
 
-    fun hasAnyAnnotationsIn(vararg annotations: KClass<out Annotation>): Boolean {
-        annotations.forEach {
-            if (element.hasAnnotation(it.java)) return true
+    override fun compareTo(other: KotlinValue): Int {
+        val simpleNameEquality = simpleName.compareTo(other.simpleName)
+        if (simpleNameEquality != 0) {
+            return simpleNameEquality
         }
-        return false
-    }
 
-    fun getAnnotation(annotationClass: KClass<out Annotation>): Annotation? {
-        return element.getAnnotation(annotationClass.java)
+        return memberName.toString().compareTo(other.memberName.toString())
     }
 
     sealed class KotlinFunction(
-        element: Element,
-        packageName: String,
-        val function: ImmutableKmFunction
+        val element: Element,
+        val function: ImmutableKmFunction,
+        packageName: String
     ) : KotlinValue(
-        element = element,
         packageName = packageName,
         simpleName = function.name
-    ), Comparable<KotlinFunction> {
+    ) {
 
         val parameters: List<ImmutableKmValueParameter> = function.valueParameters
         val receiver: MemberName? by lazy {
@@ -54,8 +53,15 @@ sealed class KotlinValue(
         val returnType: ImmutableKmType = function.returnType
         val hasReturnValue: Boolean = returnType.toMemberName() != Unit::class.toMemberName()
 
-        override fun compareTo(other: KotlinFunction): Int {
-            return this.memberName.toString().compareTo(other.memberName.toString())
+        fun hasAnyAnnotationsIn(vararg annotations: KClass<out Annotation>): Boolean {
+            annotations.forEach {
+                if (element.hasAnnotation(it.java)) return true
+            }
+            return false
+        }
+
+        fun getAnnotation(annotationClass: KClass<out Annotation>): Annotation? {
+            return element.getAnnotation(annotationClass.java)
         }
 
         class KotlinTopLevelFunction(
@@ -80,14 +86,25 @@ sealed class KotlinValue(
     }
 
     class KotlinProperty(
-        propertyElement: Element,
         packageName: String,
         val property: ImmutableKmProperty,
         val propertyData: PropertyData
     ) : KotlinValue(
-        element = propertyElement,
         packageName = packageName,
         simpleName = property.name
-    )
+    ) {
+
+        // TODO: find a way to map the actual annotation to the KotlinProperty to stop using this hack
+        fun AnnotationSpec.getParameterValueAsString(annotationTypeName: TypeName, key: String): String? {
+            return members.filter { typeName == annotationTypeName }
+                .map {
+                    val splitMember = it.toString().split("=")
+                    Pair(splitMember[0].trim(), splitMember[1].trim())
+                }
+                .firstOrNull { it.first == key }
+                ?.second
+                ?.removeWrappingQuotes()
+        }
+    }
 }
 

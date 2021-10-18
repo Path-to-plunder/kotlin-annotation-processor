@@ -13,7 +13,6 @@ import javax.lang.model.element.Element
 import kotlin.reflect.KClass
 
 sealed class KotlinContainer(
-    val element: Element,
     val packageName: String,
     val classSimpleName: String
 ) : Comparable<KotlinContainer> {
@@ -37,13 +36,11 @@ sealed class KotlinContainer(
 
     @OptIn(KotlinPoetMetadataPreview::class)
     class KotlinClass(
-        element: Element,
+        val element: Element,
         val className: ClassName,
         val classData: ClassData,
-        val functionElementMap: Map<String, Element>,
-        propertyElementMap: Map<String, Element>
+        val functionElementMap: Map<String, Element>
     ) : KotlinContainer(
-        element = element,
         packageName = classData.className.packageName,
         classSimpleName = classData.className.simpleName
     ) {
@@ -61,7 +58,6 @@ sealed class KotlinContainer(
                 .map {
                     KotlinProperty(
                         packageName = packageName,
-                        propertyElement = propertyElementMap[it.key.name]!!,
                         property = it.key,
                         propertyData = it.value
                     )
@@ -90,7 +86,6 @@ sealed class KotlinContainer(
         val fileName: String,
         val functionMap: Map<String, Element>
     ) : KotlinContainer(
-        element = element,
         packageName = packageName,
         classSimpleName = fileName
     ) {
