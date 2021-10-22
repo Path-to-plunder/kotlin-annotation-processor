@@ -80,7 +80,7 @@ sealed class KotlinContainer(
 
     @OptIn(KotlinPoetMetadataPreview::class)
     class KotlinFileFacade(
-        element: Element,
+        val element: Element,
         val immutableKmPackage: ImmutableKmPackage,
         packageName: String,
         val fileName: String,

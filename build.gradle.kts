@@ -25,4 +25,9 @@ dependencies {
     implementation("com.squareup:kotlinpoet-metadata-specs:$kotlinpoetVersion")
 }
 
-compileKotlin.kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "11"
+        freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
+    }
+}
