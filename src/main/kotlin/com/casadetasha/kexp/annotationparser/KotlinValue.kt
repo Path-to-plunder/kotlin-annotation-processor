@@ -6,6 +6,7 @@ import com.casadetasha.kexp.annotationparser.kxt.toMemberName
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.metadata.*
 import com.squareup.kotlinpoet.metadata.specs.PropertyData
 import kotlinx.metadata.KmClassifier
@@ -93,6 +94,18 @@ sealed class KotlinValue(
         packageName = packageName,
         simpleName = property.name
     ) {
+
+        val annotations: Collection<AnnotationSpec> = propertyData.allAnnotations
+        val returnType: ImmutableKmType = property.returnType
+
+        val isPublic = property.isPublic
+        val isDeclaration = property.isDeclaration
+        val isSynthesized =  property.isSynthesized
+        val isTransient: Boolean by lazy {
+            annotations
+                .map { annotationSpec -> annotationSpec.typeName }
+                .any { it == Transient::class.asTypeName() }
+        }
 
         // TODO: find a way to map the actual annotation to the KotlinProperty to stop using this hack
         fun AnnotationSpec.getParameterValueAsString(annotationTypeName: TypeName, key: String): String? {
