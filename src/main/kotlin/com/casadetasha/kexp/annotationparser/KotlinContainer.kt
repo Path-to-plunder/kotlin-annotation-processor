@@ -45,9 +45,11 @@ sealed class KotlinContainer(
         classSimpleName = classData.className.simpleName
     ) {
 
-        val primaryConstructorParams: List<ImmutableKmValueParameter>? = classData
-            .primaryConstructor()
-            ?.valueParameters
+        val primaryConstructorParams: List<ImmutableKmValueParameter>? by lazy {
+            classData
+                .primaryConstructor()
+                ?.valueParameters
+        }
 
         fun getAnnotation(annotationClass: KClass<out Annotation>): Annotation? {
             return element.getAnnotation(annotationClass.java)
