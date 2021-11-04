@@ -1,7 +1,7 @@
 package com.casadetasha.kexp.annotationparser.kxt
 
 import com.casadetasha.kexp.annotationparser.KotlinContainer
-import com.squareup.kotlinpoet.metadata.*
+import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.Element
 import kotlin.reflect.KClass

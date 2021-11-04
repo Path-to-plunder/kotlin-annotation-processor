@@ -7,8 +7,8 @@ import com.squareup.kotlinpoet.classinspector.elements.ElementsClassInspector
 import com.squareup.kotlinpoet.metadata.*
 import com.squareup.kotlinpoet.metadata.specs.ClassData
 import com.squareup.kotlinpoet.metadata.specs.containerData
-import kotlinx.metadata.ClassName as StringClassName
 import kotlinx.metadata.KmClassifier
+import kotlinx.metadata.ClassName as StringClassName
 
 @OptIn(KotlinPoetMetadataPreview::class)
 internal fun ClassName.getClassData(): ClassData {
