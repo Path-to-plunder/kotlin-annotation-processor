@@ -1,8 +1,7 @@
 package com.casadetasha.kexp.annotationparser.kxt
 
-import javax.lang.model.element.Element
-
 import kotlinx.metadata.ClassName
+import javax.lang.model.element.Element
 
 internal fun MutableList<Element>.mapOnSimpleName() = HashMap<String, Element>().apply {
     this@mapOnSimpleName.forEach { this[it.simpleName.toString()] = it }
