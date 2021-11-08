@@ -61,4 +61,3 @@ internal val Element.packageName: String
         val packageElement = processingEnv.elementUtils.getPackageOf(this)
         return processingEnv.elementUtils.getPackageOf(packageElement).qualifiedName.toString()
     }
-
