@@ -7,7 +7,7 @@ import javax.lang.model.element.Element
 import kotlin.reflect.KClass
 
 @OptIn(KotlinPoetMetadataPreview::class)
-class FileFacadeParser(private val roundEnvironment: RoundEnvironment) {
+internal class FileFacadeParser(private val roundEnvironment: RoundEnvironment) {
     private val functionListMap = HashMap<String, MutableList<Element>>()
     private val functionFileElementMap = HashMap<String, Element>()
 
