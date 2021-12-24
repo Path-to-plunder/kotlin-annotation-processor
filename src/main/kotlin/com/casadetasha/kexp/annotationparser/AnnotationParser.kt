@@ -75,6 +75,6 @@ object AnnotationParser {
         return FileFacadeParser(roundEnv).getFacadesForFilesContainingAnnotations(annotations)
     }
 
-    private fun throwNotSetupException(): Nothing = printThenThrowError(
-        "setup must be called before using AnnotationParser.")
+    private fun throwNotSetupException(): Nothing = throw IllegalStateException(
+        "'setup' must be called before using AnnotationParser.")
 }

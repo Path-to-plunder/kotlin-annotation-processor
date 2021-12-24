@@ -9,6 +9,8 @@ import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.metadata.*
 import com.squareup.kotlinpoet.metadata.specs.PropertyData
+import com.squareup.kotlinpoet.metadata.specs.TypeNameAliasTag
+import com.squareup.kotlinpoet.metadata.specs.internal.ClassInspectorUtil
 import kotlinx.metadata.KmClassifier
 import javax.lang.model.element.Element
 import kotlin.reflect.KClass
@@ -97,6 +99,7 @@ sealed class KotlinValue(
 
         val annotations: Collection<AnnotationSpec> = propertyData.allAnnotations
         val returnType: ImmutableKmType = property.returnType
+        val typeName: TypeName by lazy { returnType.toTypeName() }
 
         val isPublic = property.isPublic
         val isDeclaration = property.isDeclaration
@@ -117,6 +120,27 @@ sealed class KotlinValue(
                 .firstOrNull { it.first == key }
                 ?.second
                 ?.removeWrappingQuotes()
+        }
+
+        @KotlinPoetMetadataPreview
+        private fun ImmutableKmType.toTypeName(): TypeName {
+            val type: TypeName = when (val valClassifier = classifier) {
+                is KmClassifier.Class -> {
+                    ClassInspectorUtil.createClassName(valClassifier.name)
+                }
+                else -> throw IllegalArgumentException("Only class classifiers are currently supported.")
+            }
+            val finalType = type.copy(nullable = isNullable)
+
+            return returnType.abbreviatedType?.let {
+                // This is actually an alias! The "abbreviated type" is the alias and how it's actually
+                // represented in source. So instead - we'll return the abbreviated type but store the "real"
+                // type in tags for reference.
+                val abbreviatedTypeName = it.toTypeName()
+                abbreviatedTypeName.copy(
+                    tags = mapOf(TypeNameAliasTag::class to TypeNameAliasTag(finalType))
+                )
+            } ?: finalType
         }
     }
 }
