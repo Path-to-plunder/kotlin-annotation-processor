@@ -51,7 +51,7 @@ sealed class KotlinContainer(
                 ?.valueParameters
         }
 
-        fun getAnnotation(annotationClass: KClass<out Annotation>): Annotation? {
+        inline fun <reified T : Annotation> getAnnotation(annotationClass: KClass<out T>): T? {
             return element.getAnnotation(annotationClass.java)
         }
 
