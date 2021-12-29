@@ -101,6 +101,7 @@ sealed class KotlinValue(
         val returnType: ImmutableKmType = property.returnType
         val typeName: TypeName by lazy { returnType.toTypeName() }
 
+        val isNullable = property.returnType.isNullable
         val isPublic = property.isPublic
         val isDeclaration = property.isDeclaration
         val isSynthesized =  property.isSynthesized
