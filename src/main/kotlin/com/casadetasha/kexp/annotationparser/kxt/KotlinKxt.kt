@@ -2,6 +2,7 @@ package com.casadetasha.kexp.annotationparser.kxt
 
 import kotlinx.metadata.ClassName
 import javax.lang.model.element.Element
+import javax.lang.model.element.Name
 
 internal fun MutableList<Element>.mapOnSimpleName() = HashMap<String, Element>().apply {
     this@mapOnSimpleName.forEach { this[it.simpleName.toString()] = it }
@@ -21,5 +22,12 @@ internal val ClassName.packageName: String
 
 internal val ClassName.simpleName: String
     get() = this.split('/').last()
+
+internal fun Name.asColumnName(): String {
+    return toString()
+        .removeSuffix("\$annotations")
+        .removePrefix("get")
+        .replaceFirstChar { it.lowercase() }
+}
 
 internal fun String.removeWrappingQuotes(): String = removePrefix("\"").removeSuffix("\"")
