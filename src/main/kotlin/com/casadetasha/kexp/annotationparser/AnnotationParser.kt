@@ -1,10 +1,13 @@
 package com.casadetasha.kexp.annotationparser
 
 import com.casadetasha.kexp.annotationparser.kxt.*
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import javax.annotation.processing.Messager
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
+import javax.lang.model.element.Element
+import javax.lang.model.element.Name
 import javax.tools.Diagnostic
 import kotlin.reflect.KClass
 
@@ -55,18 +58,36 @@ object AnnotationParser {
 
     @OptIn(KotlinPoetMetadataPreview::class)
     fun getClassesAnnotatedWith(
-        annotationClass: KClass<out Annotation>
-    ): Set<KotlinContainer.KotlinClass> = roundEnv.getElementsAnnotatedWith(annotationClass.java)
-        .filter { it.isClass() }
-        .map {
-            val className = it.getClassName()
-            KotlinContainer.KotlinClass(
-                element = it,
-                className = className,
-                classData = className.getClassData(),
-                functionElementMap = it.getChildFunctionElementMap()
-            )
-        }.toSet()
+        annotationClass: KClass<out Annotation>,
+        propertyAnnotations: List<KClass<out Annotation>> = listOf()
+    ): Set<KotlinContainer.KotlinClass> {
+        val elementSet: MutableSet<Element> = HashSet<Element>().apply {
+            propertyAnnotations.forEach {
+                addAll(roundEnv.getElementsAnnotatedWith(it.java))
+            }
+        }
+        val propertyElementSet: List<Pair<String, Element>> = elementSet.map { it.simpleName.asColumnName() to it }
+        val propertyElementClassMap: MutableMap<ClassName, MutableMap<String, Element>> = HashMap()
+
+        propertyElementSet.forEach {
+            val parentName: ClassName = it.second.enclosingElement.getClassName()
+            if (propertyElementClassMap[parentName] == null) propertyElementClassMap[parentName] = HashMap()
+            propertyElementClassMap[parentName]!![it.first] = it.second
+        }
+
+        return roundEnv.getElementsAnnotatedWith(annotationClass.java)
+            .filter { it.isClass() }
+            .map {
+                val className = it.getClassName()
+                KotlinContainer.KotlinClass(
+                    element = it,
+                    className = className,
+                    classData = className.getClassData(),
+                    functionElementMap = it.getChildFunctionElementMap(),
+                    annotatedPropertyElementMap = propertyElementClassMap[className] ?: HashMap()
+                )
+            }.toSet()
+    }
 
     @OptIn(KotlinPoetMetadataPreview::class)
     fun getFileFacadesForTopLevelFunctionsAnnotatedWith(
@@ -75,6 +96,19 @@ object AnnotationParser {
         return FileFacadeParser(roundEnv).getFacadesForFilesContainingAnnotations(annotations)
     }
 
+    @OptIn(KotlinPoetMetadataPreview::class)
+    fun getPropertiesAnnotatedWith(
+        annotationClass: KClass<out Annotation>
+    ) = roundEnv.getElementsAnnotatedWith(annotationClass.java)
+        .toSet()
+
     private fun throwNotSetupException(): Nothing = throw IllegalStateException(
         "'setup' must be called before using AnnotationParser.")
+}
+
+private fun Name.asColumnName(): String {
+    return toString()
+        .removeSuffix("\$annotations")
+        .removePrefix("get")
+        .replaceFirstChar { it.lowercase() }
 }

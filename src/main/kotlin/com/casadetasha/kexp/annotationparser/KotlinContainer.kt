@@ -2,6 +2,7 @@ package com.casadetasha.kexp.annotationparser
 
 import com.casadetasha.kexp.annotationparser.KotlinValue.KotlinFunction
 import com.casadetasha.kexp.annotationparser.KotlinValue.KotlinProperty
+import com.casadetasha.kexp.annotationparser.kxt.hasAnnotation
 import com.casadetasha.kexp.annotationparser.kxt.primaryConstructor
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
@@ -9,6 +10,7 @@ import com.squareup.kotlinpoet.metadata.ImmutableKmPackage
 import com.squareup.kotlinpoet.metadata.ImmutableKmValueParameter
 import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import com.squareup.kotlinpoet.metadata.specs.ClassData
+import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
 import kotlin.reflect.KClass
 
@@ -39,7 +41,8 @@ sealed class KotlinContainer(
         val element: Element,
         val className: ClassName,
         val classData: ClassData,
-        val functionElementMap: Map<String, Element>
+        val functionElementMap: Map<String, Element>,
+        private val annotatedPropertyElementMap: Map<String, Element>
     ) : KotlinContainer(
         packageName = classData.className.packageName,
         classSimpleName = classData.className.simpleName
@@ -58,10 +61,13 @@ sealed class KotlinContainer(
         val kotlinProperties by lazy {
             classData.properties
                 .map {
+                    val property = it.key
+                    val propertyData = it.value
                     KotlinProperty(
                         packageName = packageName,
-                        property = it.key,
-                        propertyData = it.value
+                        property = property,
+                        propertyData = propertyData,
+                        annotatedElement = annotatedPropertyElementMap[property.name]
                     )
                 }
         }

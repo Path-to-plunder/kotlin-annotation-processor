@@ -1,7 +1,6 @@
 package com.casadetasha.kexp.annotationparser
 
 import com.casadetasha.kexp.annotationparser.kxt.hasAnnotation
-import com.casadetasha.kexp.annotationparser.kxt.removeWrappingQuotes
 import com.casadetasha.kexp.annotationparser.kxt.toMemberName
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.MemberName
@@ -91,7 +90,8 @@ sealed class KotlinValue(
     class KotlinProperty(
         packageName: String,
         val property: ImmutableKmProperty,
-        val propertyData: PropertyData
+        val propertyData: PropertyData,
+        val annotatedElement: Element?
     ) : KotlinValue(
         packageName = packageName,
         simpleName = property.name

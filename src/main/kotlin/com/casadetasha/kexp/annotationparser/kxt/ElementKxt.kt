@@ -31,7 +31,7 @@ internal fun Element.isClass() =
         ?.kind == KotlinClassHeader.CLASS_KIND
 
 @OptIn(KotlinPoetMetadataPreview::class)
-internal fun Element.getClassName(): ClassName {
+fun Element.getClassName(): ClassName {
     val typeMetadata = getAnnotation(Metadata::class.java)
     val kmClass = typeMetadata.toImmutableKmClass()
     return ClassInspectorUtil.createClassName(kmClass.name)
