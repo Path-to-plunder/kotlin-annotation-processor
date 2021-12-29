@@ -1,13 +1,12 @@
 package com.casadetasha.kexp.annotationparser
 
 import com.casadetasha.kexp.annotationparser.kxt.*
-import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import javax.annotation.processing.Messager
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.Element
-import javax.lang.model.element.Name
 import javax.tools.Diagnostic
 import kotlin.reflect.KClass
 
@@ -56,6 +55,11 @@ object AnnotationParser {
         throw IllegalArgumentException(errorMessage)
     }
 
+    fun printThenThrowError(errorMessage: String, exception: Exception): Nothing {
+        messager.printMessage(Diagnostic.Kind.ERROR, errorMessage)
+        throw IllegalArgumentException(errorMessage, exception)
+    }
+
     @OptIn(KotlinPoetMetadataPreview::class)
     fun getFileFacadesForTopLevelFunctionsAnnotatedWith(
         annotations: List<KClass<out Annotation>>
@@ -79,23 +83,23 @@ object AnnotationParser {
                     className = className,
                     classData = className.getClassData(),
                     functionElementMap = it.getChildFunctionElementMap(),
-                    annotatedPropertyElementMap = classToPropertyElementsMap[className] ?: HashMap()
+                    annotatedPropertyElementMap = classToPropertyElementsMap[it.memberName] ?: HashMap()
                 )
             }.toSet()
     }
 
     private fun getClassMapForPropertyAnnotations(propertyAnnotations: List<KClass<out Annotation>>):
-            MutableMap<ClassName, MutableMap<String, Element>> {
+            MutableMap<MemberName, MutableMap<String, Element>> {
         val elementSet: MutableSet<Element> = HashSet<Element>().apply {
             propertyAnnotations.forEach {
                 addAll(roundEnv.getElementsAnnotatedWith(it.java))
             }
         }
         val propertyElementSet: List<Pair<String, Element>> = elementSet.map { it.simpleName.asColumnName() to it }
-        val propertyElementClassMap: MutableMap<ClassName, MutableMap<String, Element>> = HashMap()
+        val propertyElementClassMap: MutableMap<MemberName, MutableMap<String, Element>> = HashMap()
 
         propertyElementSet.forEach {
-            val parentName: ClassName = it.second.enclosingElement.getClassName()
+            val parentName: MemberName = it.second.getNonDefaultParentMemberName()
             if (propertyElementClassMap[parentName] == null) propertyElementClassMap[parentName] = HashMap()
             propertyElementClassMap[parentName]!![it.first] = it.second
         }

@@ -1,7 +1,9 @@
 package com.casadetasha.kexp.annotationparser.kxt
 
+import com.casadetasha.kexp.annotationparser.AnnotationParser.printThenThrowError
 import com.casadetasha.kexp.annotationparser.AnnotationParser.processingEnv
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.metadata.*
 import com.squareup.kotlinpoet.metadata.specs.internal.ClassInspectorUtil
 import kotlinx.metadata.jvm.KotlinClassHeader
@@ -29,6 +31,21 @@ internal fun Element.isClass() =
         ?.readKotlinClassMetadata()
         ?.header
         ?.kind == KotlinClassHeader.CLASS_KIND
+
+@OptIn(KotlinPoetMetadataPreview::class)
+internal fun Element.getNonDefaultParentMemberName(): MemberName {
+    var parent: Element = enclosingElement
+    try {
+        if (parent.simpleName.toString() == "DefaultImpls" && parent.kind == ElementKind.CLASS) {
+            parent = parent.enclosingElement
+        }
+            return parent.memberName
+    }  catch(e: Exception) {
+        printThenThrowError(
+            "Failed to generate member info for parent element ${parent.simpleName}" +
+                    " of property $simpleName", e)
+    }
+}
 
 @OptIn(KotlinPoetMetadataPreview::class)
 internal fun Element.getClassName(): ClassName {
@@ -60,4 +77,9 @@ internal val Element.packageName: String
     get() {
         val packageElement = processingEnv.elementUtils.getPackageOf(this)
         return processingEnv.elementUtils.getPackageOf(packageElement).qualifiedName.toString()
+    }
+
+internal val Element.memberName: MemberName
+    get() {
+        return MemberName(packageName, simpleName.toString())
     }
