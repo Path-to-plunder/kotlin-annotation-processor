@@ -3,14 +3,13 @@ package com.casadetasha.kexp.annotationparser
 import com.casadetasha.kexp.annotationparser.kxt.hasAnnotation
 import com.casadetasha.kexp.annotationparser.kxt.toMemberName
 import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.metadata.*
 import com.squareup.kotlinpoet.metadata.specs.PropertyData
-import com.squareup.kotlinpoet.metadata.specs.TypeNameAliasTag
-import com.squareup.kotlinpoet.metadata.specs.internal.ClassInspectorUtil
-import kotlinx.metadata.KmClassifier
+import kotlinx.metadata.*
 import javax.lang.model.element.Element
 import kotlin.reflect.KClass
 
@@ -33,14 +32,14 @@ sealed class KotlinValue(
 
     sealed class KotlinFunction(
         val element: Element,
-        val function: ImmutableKmFunction,
+        val function: KmFunction,
         packageName: String
     ) : KotlinValue(
         packageName = packageName,
         simpleName = function.name
     ) {
 
-        val parameters: List<ImmutableKmValueParameter> = function.valueParameters
+        val parameters: List<KmValueParameter> = function.valueParameters
         val receiver: MemberName? by lazy {
             val receiverType = function.receiverParameterType
             if (receiverType == null) null
@@ -52,7 +51,7 @@ sealed class KotlinValue(
             }
         }
 
-        val returnType: ImmutableKmType = function.returnType
+        val returnType: KmType = function.returnType
         val hasReturnValue: Boolean = returnType.toMemberName() != Unit::class.toMemberName()
 
         fun hasAnyAnnotationsIn(vararg annotations: KClass<out Annotation>): Boolean {
@@ -69,7 +68,7 @@ sealed class KotlinValue(
         class KotlinTopLevelFunction(
             packageName: String,
             methodElement: Element,
-            function: ImmutableKmFunction,
+            function: KmFunction,
         ) : KotlinFunction(
             function = function,
             element = methodElement,
@@ -79,7 +78,7 @@ sealed class KotlinValue(
         class KotlinMemberFunction(
             packageName: String,
             methodElement: Element,
-            function: ImmutableKmFunction,
+            function: KmFunction,
         ) : KotlinFunction(
             function = function,
             element = methodElement,
@@ -89,7 +88,7 @@ sealed class KotlinValue(
 
     class KotlinProperty(
         packageName: String,
-        val property: ImmutableKmProperty,
+        val property: KmProperty,
         val propertyData: PropertyData,
         val annotatedElement: Element?
     ) : KotlinValue(
@@ -98,12 +97,12 @@ sealed class KotlinValue(
     ) {
 
         val annotations: Collection<AnnotationSpec> = propertyData.allAnnotations
-        val returnType: ImmutableKmType = property.returnType
+        val returnType: KmType = property.returnType
         val typeName: TypeName by lazy { returnType.toTypeName() }
 
         val isNullable: Boolean = property.returnType.isNullable
         val isMutable: Boolean = property.isVar
-        val isPublic: Boolean = property.isPublic
+        val isPublic: Boolean = property.isPublic()
         val isDeclaration: Boolean = property.isDeclaration
         val isSynthesized: Boolean =  property.isSynthesized
         val isTransient: Boolean by lazy {
@@ -117,25 +116,62 @@ sealed class KotlinValue(
         }
 
         @KotlinPoetMetadataPreview
-        private fun ImmutableKmType.toTypeName(): TypeName {
+        private fun KmType.toTypeName(): TypeName {
             val type: TypeName = when (val valClassifier = classifier) {
                 is KmClassifier.Class -> {
-                    ClassInspectorUtil.createClassName(valClassifier.name)
+                    createClassName(valClassifier.name)
                 }
                 else -> throw IllegalArgumentException("Only class classifiers are currently supported.")
             }
-            val finalType = type.copy(nullable = isNullable)
-
-            return returnType.abbreviatedType?.let {
-                // This is actually an alias! The "abbreviated type" is the alias and how it's actually
-                // represented in source. So instead - we'll return the abbreviated type but store the "real"
-                // type in tags for reference.
-                val abbreviatedTypeName = it.toTypeName()
-                abbreviatedTypeName.copy(
-                    tags = mapOf(TypeNameAliasTag::class to TypeNameAliasTag(finalType))
-                )
-            } ?: finalType
+            return type.copy(nullable = isNullable)
         }
     }
 }
 
+private fun KmProperty.isPublic(): Boolean {
+    val publicVisibilityFlag = flagsOf(Flag.IS_PUBLIC)
+    return flags and publicVisibilityFlag == publicVisibilityFlag
+}
+
+internal fun createClassName(kotlinMetadataName: String): ClassName {
+    require(!kotlinMetadataName.isLocal) {
+        "Local/anonymous classes are not supported!"
+    }
+    // Top-level: package/of/class/MyClass
+    // Nested A:  package/of/class/MyClass.NestedClass
+    val simpleName = kotlinMetadataName.substringAfterLast(
+        '/', // Drop the package name, e.g. "package/of/class/"
+        '.' // Drop any enclosing classes, e.g. "MyClass."
+    )
+    val packageName = kotlinMetadataName.substringBeforeLast(
+        delimiter = "/",
+        missingDelimiterValue = ""
+    )
+    val simpleNames = kotlinMetadataName.removeSuffix(simpleName)
+        .removeSuffix(".") // Trailing "." if any
+        .removePrefix(packageName)
+        .removePrefix("/")
+        .let {
+            if (it.isNotEmpty()) {
+                it.split(".")
+            } else {
+                // Don't split, otherwise we end up with an empty string as the first element!
+                emptyList()
+            }
+        }
+        .plus(simpleName)
+
+    return ClassName(
+        packageName = packageName.replace("/", "."),
+        simpleNames = simpleNames
+    )
+}
+
+private fun String.substringAfterLast(vararg delimiters: Char): String {
+    val index = lastIndexOfAny(delimiters)
+    return if (index == -1) this else substring(index + 1, length)
+}
+private fun String.substringBeforeLast(delimiter: String, missingDelimiterValue: String = this): String {
+    val index = lastIndexOf(delimiter)
+    return if (index == -1) missingDelimiterValue else substring(0, index)
+}

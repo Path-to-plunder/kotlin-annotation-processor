@@ -2,10 +2,11 @@ package com.casadetasha.kexp.annotationparser.kxt
 
 import com.casadetasha.kexp.annotationparser.AnnotationParser.printThenThrowError
 import com.casadetasha.kexp.annotationparser.AnnotationParser.processingEnv
+import com.casadetasha.kexp.annotationparser.createClassName
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.metadata.*
-import com.squareup.kotlinpoet.metadata.specs.internal.ClassInspectorUtil
+import kotlinx.metadata.KmPackage
 import kotlinx.metadata.jvm.KotlinClassHeader
 import kotlinx.metadata.jvm.KotlinClassMetadata
 import javax.lang.model.element.Element
@@ -13,10 +14,10 @@ import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 
 @OptIn(KotlinPoetMetadataPreview::class)
-internal fun Element.getParentFileKmPackage(): ImmutableKmPackage =
+internal fun Element.getParentFileKmPackage(): KmPackage =
     enclosingElement.getAnnotation(Metadata::class.java)!!
         .toKotlinClassMetadata<KotlinClassMetadata.FileFacade>()
-        .toImmutableKmPackage()
+        .toKmPackage()
 
 @OptIn(KotlinPoetMetadataPreview::class)
 internal fun Element.isTopLevelFunction() =
@@ -50,8 +51,8 @@ internal fun Element.getNonDefaultParentMemberName(): MemberName {
 @OptIn(KotlinPoetMetadataPreview::class)
 internal fun Element.getClassName(): ClassName {
     val typeMetadata = getAnnotation(Metadata::class.java)
-    val kmClass = typeMetadata.toImmutableKmClass()
-    return ClassInspectorUtil.createClassName(kmClass.name)
+    val kmClass = typeMetadata.toKmClass()
+    return createClassName(kmClass.name)
 }
 
 internal fun Element.asKey(): String {

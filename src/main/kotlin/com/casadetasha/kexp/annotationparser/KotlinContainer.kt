@@ -2,15 +2,13 @@ package com.casadetasha.kexp.annotationparser
 
 import com.casadetasha.kexp.annotationparser.KotlinValue.KotlinFunction
 import com.casadetasha.kexp.annotationparser.KotlinValue.KotlinProperty
-import com.casadetasha.kexp.annotationparser.kxt.hasAnnotation
 import com.casadetasha.kexp.annotationparser.kxt.primaryConstructor
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.metadata.ImmutableKmPackage
-import com.squareup.kotlinpoet.metadata.ImmutableKmValueParameter
 import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import com.squareup.kotlinpoet.metadata.specs.ClassData
-import javax.lang.model.element.AnnotationMirror
+import kotlinx.metadata.KmPackage
+import kotlinx.metadata.KmValueParameter
 import javax.lang.model.element.Element
 import kotlin.reflect.KClass
 
@@ -48,7 +46,7 @@ sealed class KotlinContainer(
         classSimpleName = classData.className.simpleName
     ) {
 
-        val primaryConstructorParams: List<ImmutableKmValueParameter>? by lazy {
+        val primaryConstructorParams: List<KmValueParameter>? by lazy {
             classData
                 .primaryConstructor()
                 ?.valueParameters
@@ -89,7 +87,7 @@ sealed class KotlinContainer(
     @OptIn(KotlinPoetMetadataPreview::class)
     class KotlinFileFacade(
         val element: Element,
-        val immutableKmPackage: ImmutableKmPackage,
+        val immutableKmPackage: KmPackage,
         packageName: String,
         val fileName: String,
         val functionMap: Map<String, Element>
