@@ -9,6 +9,8 @@ val googleAutoServiceVersion: String by project
 
 plugins {
     `java-library`
+    `maven-publish`
+    signing
     kotlin("jvm")
     kotlin("kapt")
 }
@@ -29,4 +31,70 @@ tasks.withType<KotlinCompile> {
         jvmTarget = "11"
         freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
     }
+}
+
+val javadocJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("javadoc")
+    dependsOn("javadoc")
+    from(tasks.javadoc.get().destinationDir)
+}
+
+val sourcesJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
+
+publishing {
+    repositories {
+        maven {
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = "spencerg42"
+                password = "s8qCjsm6dQuF*RC"
+            }
+        }
+    }
+    publications {
+        register("mavenJava", MavenPublication::class) {
+            from(components["java"])
+
+            group = "com.casadetasha"
+            artifactId = "annotation-parser"
+            version = "0.1.0"
+
+            artifact(sourcesJar.get())
+            artifact(javadocJar.get())
+
+            pom {
+                name.set("CDT Annotation Parser")
+                description.set("An annotation parser to drown my tears with the constant humming of processors, spinning with code generation.")
+                url.set("http://www.sproutes.io")
+
+                scm {
+                    connection.set("scm:git://github.com/Path-to-plunder/kotlin-annotation-processor.git")
+                    developerConnection.set("scm:git:git@github.com:Path-to-plunder/kotlin-annotation-processor.git")
+                    url.set("https://github.com/Path-to-plunder/kotlin-annotation-processor")
+                }
+
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("gabriel")
+                        name.set("Gabriel Spencer")
+                        email.set("gabrieljspencer@gmail.com")
+                    }
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign(publishing.publications["mavenJava"])
 }
