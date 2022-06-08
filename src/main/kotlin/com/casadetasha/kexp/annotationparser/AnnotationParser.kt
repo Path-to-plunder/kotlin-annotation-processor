@@ -2,7 +2,6 @@ package com.casadetasha.kexp.annotationparser
 
 import com.casadetasha.kexp.annotationparser.kxt.*
 import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import javax.annotation.processing.Messager
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
@@ -60,14 +59,12 @@ object AnnotationParser {
         throw IllegalArgumentException(errorMessage, exception)
     }
 
-    @OptIn(KotlinPoetMetadataPreview::class)
     fun getFileFacadesForTopLevelFunctionsAnnotatedWith(
         annotations: List<KClass<out Annotation>>
     ): Set<KotlinContainer.KotlinFileFacade> {
         return FileFacadeParser(roundEnv).getFacadesForFilesContainingAnnotations(annotations)
     }
 
-    @OptIn(KotlinPoetMetadataPreview::class)
     fun getClassesAnnotatedWith(
         annotationClass: KClass<out Annotation>,
         propertyAnnotations: List<KClass<out Annotation>> = listOf()
@@ -81,7 +78,6 @@ object AnnotationParser {
                 KotlinContainer.KotlinClass(
                     element = it,
                     className = className,
-                    classData = className.getClassData(),
                     functionElementMap = it.getChildFunctionElementMap(),
                     annotatedPropertyElementMap = classToPropertyElementsMap[it.memberName] ?: HashMap()
                 )

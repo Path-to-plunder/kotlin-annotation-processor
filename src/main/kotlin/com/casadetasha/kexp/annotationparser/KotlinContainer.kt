@@ -2,6 +2,7 @@ package com.casadetasha.kexp.annotationparser
 
 import com.casadetasha.kexp.annotationparser.KotlinValue.KotlinFunction
 import com.casadetasha.kexp.annotationparser.KotlinValue.KotlinProperty
+import com.casadetasha.kexp.annotationparser.kxt.getClassData
 import com.casadetasha.kexp.annotationparser.kxt.primaryConstructor
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
@@ -33,18 +34,18 @@ sealed class KotlinContainer(
         return memberName.toString().compareTo(other.memberName.toString())
     }
 
-
     @OptIn(KotlinPoetMetadataPreview::class)
     class KotlinClass(
         val element: Element,
         val className: ClassName,
-        val classData: ClassData,
         val functionElementMap: Map<String, Element>,
         private val annotatedPropertyElementMap: Map<String, Element>
     ) : KotlinContainer(
-        packageName = classData.className.packageName,
-        classSimpleName = classData.className.simpleName
+        packageName = className.packageName,
+        classSimpleName = className.simpleName
     ) {
+
+        val classData: ClassData by lazy { className.getClassData() }
 
         val primaryConstructorParams: List<KmValueParameter>? by lazy {
             classData
@@ -84,7 +85,6 @@ sealed class KotlinContainer(
         }
     }
 
-    @OptIn(KotlinPoetMetadataPreview::class)
     class KotlinFileFacade(
         val element: Element,
         val immutableKmPackage: KmPackage,
