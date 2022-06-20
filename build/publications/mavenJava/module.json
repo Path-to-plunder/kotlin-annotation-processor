@@ -1,0 +1,110 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.casadetasha",
+    "module": "annotation-parser",
+    "version": "0.1.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "7.4"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib-jdk8",
+          "version": {
+            "requires": "1.6.10"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "annotation-parser-0.1.0.jar",
+          "url": "annotation-parser-0.1.0.jar",
+          "size": 55899,
+          "sha512": "a8778a701d789ff0a517713a46f032d20bba5949df80d75c0b7496dba930f1b95edb0d0ac4fe1317b1c1ccb8c1a934040728a2d210cfb41d3b64612587926986",
+          "sha256": "7da63e829aa0b115af0bc1538685484521e80a02d6c0814acea94f0f68c4c8f4",
+          "sha1": "8f41023bf8bfee14a939d206d232f4a31a13d77c",
+          "md5": "6b126c642bc371899f45987d91421e13"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-metadata-jvm",
+          "version": {
+            "requires": "0.3.0"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-core",
+          "version": {
+            "requires": "1.6.0"
+          }
+        },
+        {
+          "group": "com.squareup",
+          "module": "kotlinpoet",
+          "version": {
+            "requires": "1.11.0"
+          }
+        },
+        {
+          "group": "com.squareup",
+          "module": "kotlinpoet-metadata",
+          "version": {
+            "requires": "1.11.0"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib-jdk8",
+          "version": {
+            "requires": "1.6.10"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "annotation-parser-0.1.0.jar",
+          "url": "annotation-parser-0.1.0.jar",
+          "size": 55899,
+          "sha512": "a8778a701d789ff0a517713a46f032d20bba5949df80d75c0b7496dba930f1b95edb0d0ac4fe1317b1c1ccb8c1a934040728a2d210cfb41d3b64612587926986",
+          "sha256": "7da63e829aa0b115af0bc1538685484521e80a02d6c0814acea94f0f68c4c8f4",
+          "sha1": "8f41023bf8bfee14a939d206d232f4a31a13d77c",
+          "md5": "6b126c642bc371899f45987d91421e13"
+        }
+      ]
+    }
+  ]
+}

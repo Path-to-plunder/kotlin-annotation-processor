@@ -19,8 +19,8 @@ plugins {
     `java-library`
     `maven-publish`
     signing
-    kotlin("jvm")
-    kotlin("kapt")
+    kotlin("jvm") version "1.6.10"
+    kotlin("kapt") version "1.6.10"
 }
 
 repositories {
