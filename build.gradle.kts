@@ -68,7 +68,7 @@ publishing {
 
             group = "com.casadetasha"
             artifactId = "annotation-parser"
-            version = "0.1.0"
+            version = "0.2.1"
 
             artifact(sourcesJar.get())
             artifact(javadocJar.get())

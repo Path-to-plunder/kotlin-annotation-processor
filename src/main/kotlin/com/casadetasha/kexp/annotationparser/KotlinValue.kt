@@ -11,6 +11,8 @@ import com.squareup.kotlinpoet.metadata.*
 import com.squareup.kotlinpoet.metadata.specs.PropertyData
 import kotlinx.metadata.*
 import javax.lang.model.element.Element
+import javax.lang.model.element.ExecutableElement
+import javax.lang.model.element.VariableElement
 import kotlin.reflect.KClass
 
 @OptIn(KotlinPoetMetadataPreview::class)
@@ -39,7 +41,9 @@ sealed class KotlinValue(
         simpleName = function.name
     ) {
 
-        val parameters: List<KmValueParameter> = function.valueParameters
+        val parameterMap: Map<String, KotlinParameter> by lazy { createParameterMap(element, function.valueParameters) }
+        val parameters: Collection<KotlinParameter> by lazy { parameterMap.values }
+
         val receiver: MemberName? by lazy {
             val receiverType = function.receiverParameterType
             if (receiverType == null) null
