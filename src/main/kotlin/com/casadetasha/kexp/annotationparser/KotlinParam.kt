@@ -1,6 +1,6 @@
 package com.casadetasha.kexp.annotationparser
 
-import kotlinx.metadata.KmValueParameter
+import kotlin.metadata.KmValueParameter
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.VariableElement

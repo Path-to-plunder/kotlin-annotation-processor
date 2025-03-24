@@ -1,6 +1,6 @@
 package com.casadetasha.kexp.annotationparser.kxt
 
-import kotlinx.metadata.ClassName
+import kotlin.metadata.ClassName
 import javax.lang.model.element.Element
 import javax.lang.model.element.Name
 

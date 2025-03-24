@@ -7,15 +7,11 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asTypeName
-import com.squareup.kotlinpoet.metadata.*
 import com.squareup.kotlinpoet.metadata.specs.PropertyData
-import kotlinx.metadata.*
 import javax.lang.model.element.Element
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.VariableElement
+import kotlin.metadata.*
 import kotlin.reflect.KClass
 
-@OptIn(KotlinPoetMetadataPreview::class)
 sealed class KotlinValue(
     val packageName: String,
     val simpleName: String
@@ -107,8 +103,6 @@ sealed class KotlinValue(
         val isNullable: Boolean = property.returnType.isNullable
         val isMutable: Boolean = property.isVar
         val isPublic: Boolean = property.isPublic()
-        val isDeclaration: Boolean = property.isDeclaration
-        val isSynthesized: Boolean =  property.isSynthesized
         val isTransient: Boolean by lazy {
             annotations
                 .map { annotationSpec -> annotationSpec.typeName }
@@ -119,7 +113,6 @@ sealed class KotlinValue(
             return annotations.firstOrNull { it.typeName == kClass.asTypeName()  }
         }
 
-        @KotlinPoetMetadataPreview
         private fun KmType.toTypeName(): TypeName {
             val type: TypeName = when (val valClassifier = classifier) {
                 is KmClassifier.Class -> {
@@ -133,14 +126,11 @@ sealed class KotlinValue(
 }
 
 private fun KmProperty.isPublic(): Boolean {
-    val publicVisibilityFlag = flagsOf(Flag.IS_PUBLIC)
-    return flags and publicVisibilityFlag == publicVisibilityFlag
+    return this.visibility == Visibility.PUBLIC
 }
 
 internal fun createClassName(kotlinMetadataName: String): ClassName {
-    require(!kotlinMetadataName.isLocal) {
-        "Local/anonymous classes are not supported!"
-    }
+
     // Top-level: package/of/class/MyClass
     // Nested A:  package/of/class/MyClass.NestedClass
     val simpleName = kotlinMetadataName.substringAfterLast(

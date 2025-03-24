@@ -84,6 +84,44 @@ object AnnotationParser {
             }.toSet()
     }
 
+    fun getInterfacesAnnotatedWith(
+        annotationClass: KClass<out Annotation>,
+        propertyAnnotations: List<KClass<out Annotation>> = listOf()
+    ): Set<KotlinContainer.KotlinClass> {
+        val classToPropertyElementsMap = getClassMapForPropertyAnnotations(propertyAnnotations)
+
+        return roundEnv.getElementsAnnotatedWith(annotationClass.java)
+            .filter { it.isInterface() }
+            .map {
+                val className = it.getClassName()
+                KotlinContainer.KotlinClass(
+                    element = it,
+                    className = className,
+                    functionElementMap = it.getChildFunctionElementMap(),
+                    annotatedPropertyElementMap = classToPropertyElementsMap[it.memberName] ?: HashMap()
+                )
+            }.toSet()
+    }
+
+    fun getClassesAndInterfacesAnnotatedWith(
+        annotationClass: KClass<out Annotation>,
+        propertyAnnotations: List<KClass<out Annotation>> = listOf()
+    ): Set<KotlinContainer.KotlinClass> {
+        val classToPropertyElementsMap = getClassMapForPropertyAnnotations(propertyAnnotations)
+
+        return roundEnv.getElementsAnnotatedWith(annotationClass.java)
+            .filter { it.isClass() || it.isInterface() }
+            .map {
+                val className = it.getClassName()
+                KotlinContainer.KotlinClass(
+                    element = it,
+                    className = className,
+                    functionElementMap = it.getChildFunctionElementMap(),
+                    annotatedPropertyElementMap = classToPropertyElementsMap[it.memberName] ?: HashMap()
+                )
+            }.toSet()
+    }
+
     private fun getClassMapForPropertyAnnotations(propertyAnnotations: List<KClass<out Annotation>>):
             MutableMap<MemberName, MutableMap<String, Element>> {
         val elementSet: MutableSet<Element> = HashSet<Element>().apply {

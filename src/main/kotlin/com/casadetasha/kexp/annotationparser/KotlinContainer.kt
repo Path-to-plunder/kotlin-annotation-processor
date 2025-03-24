@@ -6,10 +6,9 @@ import com.casadetasha.kexp.annotationparser.kxt.getClassData
 import com.casadetasha.kexp.annotationparser.kxt.primaryConstructor
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import com.squareup.kotlinpoet.metadata.specs.ClassData
-import kotlinx.metadata.KmPackage
-import kotlinx.metadata.KmValueParameter
+import kotlin.metadata.KmPackage
+import kotlin.metadata.KmValueParameter
 import javax.lang.model.element.Element
 import kotlin.reflect.KClass
 
@@ -34,7 +33,6 @@ sealed class KotlinContainer(
         return memberName.toString().compareTo(other.memberName.toString())
     }
 
-    @OptIn(KotlinPoetMetadataPreview::class)
     class KotlinClass(
         val element: Element,
         val className: ClassName,
