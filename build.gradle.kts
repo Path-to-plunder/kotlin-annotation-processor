@@ -55,6 +55,12 @@ val sourcesJar by tasks.registering(Jar::class) {
 publishing {
     repositories {
         maven {
+            name = "local"
+            isAllowInsecureProtocol = true
+            url = uri("http://localhost:8081/repository/maven-local")
+        }
+        maven {
+            name = "sonatype"
             url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
             credentials {
                 username = prop.getProperty("newOssrhUsername")
@@ -68,7 +74,7 @@ publishing {
 
             group = "com.casadetasha"
             artifactId = "annotation-parser"
-            version = "2.1.0-alpha3"
+            version = "2.1.0-alpha4"
 
             artifact(sourcesJar.get())
             artifact(javadocJar.get())

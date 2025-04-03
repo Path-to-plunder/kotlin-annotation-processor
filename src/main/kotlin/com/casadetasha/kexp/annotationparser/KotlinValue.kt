@@ -2,11 +2,9 @@ package com.casadetasha.kexp.annotationparser
 
 import com.casadetasha.kexp.annotationparser.kxt.hasAnnotation
 import com.casadetasha.kexp.annotationparser.kxt.toMemberName
-import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.TypeName
-import com.squareup.kotlinpoet.asTypeName
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.metadata.specs.PropertyData
 import javax.lang.model.element.Element
 import kotlin.metadata.*
@@ -114,13 +112,25 @@ sealed class KotlinValue(
         }
 
         private fun KmType.toTypeName(): TypeName {
-            val type: TypeName = when (val valClassifier = classifier) {
+            val className = when (val valClassifier = classifier) {
                 is KmClassifier.Class -> {
                     createClassName(valClassifier.name)
                 }
                 else -> throw IllegalArgumentException("Only class classifiers are currently supported.")
             }
-            return type.copy(nullable = isNullable)
+
+            val typeArguments = arguments.map { typeProjection ->
+                val argType = typeProjection.type
+                    ?: throw IllegalArgumentException("Wildcard and star projections not yet supported.")
+
+                argType.toTypeName()
+            }
+
+            return if (typeArguments.isNotEmpty()) {
+                className.parameterizedBy(*typeArguments.toTypedArray()).copy(nullable = isNullable)
+            } else {
+                className.copy(nullable = isNullable)
+            }
         }
     }
 }
